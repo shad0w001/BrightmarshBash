@@ -93,8 +93,25 @@ public class ProjectileGun : MonoBehaviour
         GameObject currentBullet = Instantiate(bullet, attackPoint.position, Quaternion.identity);
         currentBullet.transform.forward = directionWithSpread.normalized;
 
-        currentBullet.GetComponent<Rigidbody>().AddForce(directionWithSpread.normalized * shootForce, ForceMode.Impulse);
-        currentBullet.GetComponent<Rigidbody>().AddForce(fpsCamera.transform.up * upwardForce, ForceMode.Impulse);
+
+        Rigidbody bulletRigidBody = currentBullet.GetComponent<Rigidbody>();
+        bulletRigidBody.AddForce(directionWithSpread.normalized * shootForce, ForceMode.Impulse);
+        bulletRigidBody.AddForce(fpsCamera.transform.up * upwardForce, ForceMode.Impulse);
+
+        var bulletScript = currentBullet.GetComponent<CustomBulletScript>();
+
+        if (bulletScript != null)
+        {
+            bulletScript.shooter = this.gameObject;
+
+            // You need a way to know the team of this gun/shooter.
+            // For example, get it from a TeamMember component:
+            var teamMember = GetComponent<TeamMember>();
+            if (teamMember != null)
+            {
+                bulletScript.team = teamMember.team;
+            }
+        }
 
         bulletsLeft--;
         bulletsShot++;

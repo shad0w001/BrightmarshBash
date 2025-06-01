@@ -5,6 +5,7 @@ using UnityEngine;
 public class CustomBulletScript : MonoBehaviour
 {
     public Rigidbody rigidBody;
+    public GameObject explosion;
     public GameObject explosionEffect;
     public LayerMask isHittable;
 
@@ -15,10 +16,14 @@ public class CustomBulletScript : MonoBehaviour
     public float explosionRange;
     public float explosionForce;
     public float explosionUpwardForce;
+    private bool hasExploded = false;
 
     public int maxNumberOfCollisions;
     public float maxLifeTimeInSeconds;
     public bool explodeOnTounch = true;
+
+    public GameObject shooter;
+    public Team team;
 
     int collisions;
     PhysicMaterial collisionMaterial;
@@ -56,9 +61,14 @@ public class CustomBulletScript : MonoBehaviour
 
     private void OnCollisionEnter(Collision collision)
     {
+        if (hasExploded)// prevent double explosion
+        {
+            return;
+        }
+
         collisions++;
 
-        if (collision.collider.CompareTag("Enemy") && explodeOnTounch)
+        if (explodeOnTounch)
         {
             Explode();
         }
@@ -66,27 +76,72 @@ public class CustomBulletScript : MonoBehaviour
 
     private void Explode()
     {
+        if (hasExploded)// prevent double explosion
+        {
+            return;
+        } 
+        hasExploded = true;
+
         if (explosionEffect is not null)
         {
-            Instantiate(explosionEffect, transform.position, Quaternion.identity);
+            //put the explosion into a variable so it can be deleted later
+            explosion = Instantiate(explosionEffect, transform.position, Quaternion.identity);
         }
 
         Collider[] enemies = Physics.OverlapSphere(transform.position, explosionRange, isHittable);
 
         for (int i = 0; i < enemies.Length; i++)
         {
-            if (enemies[i].GetComponent<Rigidbody>())
+            Rigidbody rb = enemies[i].GetComponent<Rigidbody>();
+            if (rb == null)
             {
-                enemies[i].GetComponent<Rigidbody>().AddExplosionForce(explosionForce, transform.position, explosionRange, explosionUpwardForce, ForceMode.VelocityChange);
+                continue;
             }
+
+            GameObject target = rb.gameObject;
+
+            //if hits self
+            if (target == shooter)
+            {
+                Debug.Log("Hit self");
+
+                IPhysicsHandler physicsHandler = shooter.GetComponent<IPhysicsHandler>();
+
+                if (physicsHandler != null)
+                {
+                    Vector3 forceDir = (target.transform.position - transform.position).normalized;
+                    Vector3 force = forceDir * explosionForce + Vector3.up * explosionUpwardForce;
+
+                    physicsHandler.ApplyForce(force);
+                }
+
+                continue;
+            }
+
+            //if hits teammate
+            TeamMember targetTeamMember = target.GetComponent<TeamMember>();
+            if (targetTeamMember != null)
+            {
+                if (targetTeamMember.team == team)
+                {
+                    Debug.Log("Hit teammate");
+                    // Same team = no knockback
+                    continue;
+                }
+            }
+
+            //else (hits enemy)
+            Debug.Log("Hit enemy");
+            rb.AddExplosionForce(explosionForce, transform.position, explosionRange, explosionUpwardForce, ForceMode.Impulse);
         }
 
-        Invoke("DestroyBullet", 0.05f);
+        DestroyBullet();
     }
 
     private void DestroyBullet()
     {
-        Destroy(gameObject);
+        Destroy(gameObject, 0.05f);
+        Destroy(explosion, 3f);
     }
 
     private void OnDrawGizmosSelected()

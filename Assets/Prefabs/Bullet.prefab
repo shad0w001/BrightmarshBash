@@ -147,15 +147,18 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   rigidBody: {fileID: 8025928406918275806}
-  explosionEffect: {fileID: 3654741155788002110, guid: ac8053bb68b7997419467a34b74fb975, type: 3}
+  explosion: {fileID: 0}
+  explosionEffect: {fileID: 3352391191284423565, guid: 9571e0e1b1e65834cbba759493c171d3, type: 3}
   isHittable:
     serializedVersion: 2
-    m_Bits: 64
-  bouncinessFactor: 0
-  useGravity: 0
-  explosionRange: 10
+    m_Bits: 72
+  bouncinessFactor: 0.2
+  useGravity: 1
+  explosionRange: 1.5
   explosionForce: 10
   explosionUpwardForce: 5
   maxNumberOfCollisions: 1
-  maxLifeTimeInSeconds: 2
+  maxLifeTimeInSeconds: 1.2
   explodeOnTounch: 1
+  shooter: {fileID: 0}
+  team: 0
