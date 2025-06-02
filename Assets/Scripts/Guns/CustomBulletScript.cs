@@ -160,7 +160,7 @@ public class CustomBulletScript : MonoBehaviour
 
     private void OnDrawGizmosSelected()
     {
-        Gizmos.color = Color.red;
+        Gizmos.color = Color.blue;
         Gizmos.DrawWireSphere(transform.position, explosionRange);
     }
 }

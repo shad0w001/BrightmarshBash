@@ -13,9 +13,9 @@ GameObject:
   - component: {fileID: 4651525263710157295}
   - component: {fileID: 6577938789451971481}
   - component: {fileID: 8025928406918275806}
-  - component: {fileID: 8073243424162795893}
+  - component: {fileID: 4383417847442687551}
   m_Layer: 8
-  m_Name: Bullet
+  m_Name: AI Bullet
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -134,7 +134,7 @@ Rigidbody:
   m_Interpolate: 1
   m_Constraints: 0
   m_CollisionDetection: 1
---- !u!114 &8073243424162795893
+--- !u!114 &4383417847442687551
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -143,22 +143,23 @@ MonoBehaviour:
   m_GameObject: {fileID: 2870532559186650056}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 5effa5fc645ff5143aa8c7f3159facd6, type: 3}
+  m_Script: {fileID: 11500000, guid: b126124e47cbf2542971918f90b4c2e0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   rigidBody: {fileID: 8025928406918275806}
-  explosion: {fileID: 0}
-  explosionEffect: {fileID: 3352391191284423565, guid: 9571e0e1b1e65834cbba759493c171d3, type: 3}
+  bouncinessFactor: 0
+  useGravity: 0
+  explosionRange: 5
+  explosionForce: 20
+  explosionUpwardForce: 5
+  explosionEffect: {fileID: 298600094589408116, guid: 36d56198cec688647b4e251f2356a325, type: 3}
   isHittable:
     serializedVersion: 2
     m_Bits: 200
-  bouncinessFactor: 0.2
-  useGravity: 1
-  explosionRange: 1.5
-  explosionForce: 10
-  explosionUpwardForce: 5
-  maxNumberOfCollisions: 1
-  maxLifeTimeInSeconds: 1.2
-  explodeOnTounch: 1
+  upwardBiasMultiplier: 5
+  maxNumberOfCollisions: 2
+  maxLifeTimeInSeconds: 1.5
+  explodeOnTouch: 1
+  gracePeriod: 0.5
   shooter: {fileID: 0}
-  team: 1
+  team: 0

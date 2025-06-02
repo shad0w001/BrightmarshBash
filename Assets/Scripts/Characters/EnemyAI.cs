@@ -17,6 +17,7 @@ public class EnemyAI : MonoBehaviour
     public NavMeshAgent agent;
     public Transform player;
     public Transform capturePoint;
+    private EnemyProjectileGun shooter;
 
     public LayerMask isGround, isPlayer;
 
@@ -37,13 +38,14 @@ public class EnemyAI : MonoBehaviour
     {
         agent = GetComponent<NavMeshAgent>();
         player = GameObject.Find("PlayerCapsule").transform;
+        shooter = GetComponent<EnemyProjectileGun>();
 
         if (capturePoint == null)
         {
             Debug.LogError("Capture Point not assigned.");
         }
 
-        Debug.Log($"{capturePoint.position.ToString()}");
+        Debug.Log($"Caputre point set at: {capturePoint.position.ToString()}");
         currentState = EnemyState.SeekingCapturePoint;
     }
 
@@ -78,19 +80,15 @@ public class EnemyAI : MonoBehaviour
         switch (currentState)
         {
             case EnemyState.SeekingCapturePoint:
-                Debug.Log("seeking capture point");
                 SeekCapturePoint();
                 break;
             case EnemyState.Patrolling:
-                Debug.Log("patroling");
                 PatrolAroundCapturePoint();
                 break;
             case EnemyState.Chasing:
-                Debug.Log("chasing");
                 ChasePlayer();
                 break;
             case EnemyState.Attacking:
-                Debug.Log("attacking");
                 StopAndAttack();
                 break;
         }
@@ -147,11 +145,19 @@ public class EnemyAI : MonoBehaviour
 
     private void StopAndAttack()
     {
-        if (agent.enabled)
-        {
-            agent.ResetPath(); // Stop moving
-        }
+        if (agent.enabled && agent.isOnNavMesh)
+            agent.ResetPath();
 
-        // TODO: Trigger attack animations/effects
+        // Face player
+        Vector3 dir = (player.position - transform.position).normalized;
+        dir.y = 0;
+        if (dir != Vector3.zero)
+            transform.rotation = Quaternion.LookRotation(dir);
+
+        // Fire if ready
+        if (shooter != null && shooter.IsReadyToShoot())
+        {
+            shooter.ShootAt(player.position);
+        }
     }
 }

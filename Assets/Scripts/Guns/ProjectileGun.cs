@@ -58,7 +58,7 @@ public class ProjectileGun : MonoBehaviour
             Reload();
         }
 
-        if(readyToShoot && shooting && !reloading && bulletsLeft> 0)
+        if (readyToShoot && shooting && !reloading && bulletsLeft > 0)
         {
             bulletsShot = 0;
 
@@ -116,13 +116,13 @@ public class ProjectileGun : MonoBehaviour
         bulletsLeft--;
         bulletsShot++;
 
-        if(allowReset)
+        if (allowReset)
         {
             Invoke("ResetShot", timeBetweenShooting);
             allowReset = false;
         }
-        
-        if(bulletsShot < bulletsPerTap && bulletsLeft > 0)
+
+        if (bulletsShot < bulletsPerTap && bulletsLeft > 0)
         {
             Invoke("ShootGun", timeBetweenShooting);
         }
