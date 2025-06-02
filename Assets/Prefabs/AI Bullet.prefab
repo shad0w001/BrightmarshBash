@@ -158,8 +158,8 @@ MonoBehaviour:
     m_Bits: 200
   upwardBiasMultiplier: 10
   maxNumberOfCollisions: 1
-  maxLifeTimeInSeconds: 1.5
+  maxLifeTimeInSeconds: 1
   explodeOnTouch: 1
-  gracePeriod: 0.5
+  gracePeriod: 0.1
   shooter: {fileID: 0}
   team: 0

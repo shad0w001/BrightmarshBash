@@ -3,6 +3,7 @@ using StarterAssets;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using TMPro;
 
 public class CapturePoint : MonoBehaviour
 {
@@ -13,13 +14,20 @@ public class CapturePoint : MonoBehaviour
 
     private int playerCounter = 0;
     private int enemyCounter = 0;
+    public int counterMaxValue = 15;
 
     private Collider captureTrigger;
     private FirstPersonController playerController;
-    public CinemachineVirtualCamera[] winEndCameras;
-    public CinemachineVirtualCamera[] looseEndCameras;
 
     private bool pointCaptured = false;
+
+    public Light captureLight;
+    public Color playerColor = Color.blue;
+    public Color enemyColor = Color.red;
+    public Color neutralColor = Color.white;
+
+    public TMP_Text playerProgressText;
+    public TMP_Text enemyProgressText;
 
     private void Awake()
     {
@@ -87,22 +95,45 @@ public class CapturePoint : MonoBehaviour
             }
             else
             {
-                //Debug.Log("No capture progress this second");
             }
 
+            UpdateLightColor();
+
             //check for 100% capture
-            if (playerCounter >= 15)
+            if (playerCounter >= counterMaxValue)
             {
+                playerCounter = counterMaxValue;
                 FinalizePointCapture("Player");
 
                 //ShowVictoryScreen()
             }
-            else if (enemyCounter >= 100)
+            else if (enemyCounter >= counterMaxValue)
             {
+                enemyCounter = counterMaxValue;
                 FinalizePointCapture("Enemy");
 
                 //ShowDefeatScreen()
             }
+
+            playerProgressText.text = $"{playerCounter}%";
+            enemyProgressText.text = $"{enemyCounter}%";
+        }
+    }
+    private void UpdateLightColor()
+    {
+        if (pointCaptured || captureLight == null) return;
+
+        if (playerInside && !enemyInside)
+        {
+            captureLight.color = playerColor;
+        }
+        else if (enemyInside && !playerInside)
+        {
+            captureLight.color = enemyColor;
+        }
+        else
+        {
+            captureLight.color = neutralColor;
         }
     }
 
@@ -114,33 +145,6 @@ public class CapturePoint : MonoBehaviour
 
         playerController.enabled = false;
     }
-
-    private void ShowVictoryScreen()
-    {
-        var brain = CinemachineCore.Instance.GetActiveBrain(0);
-        if (brain == null || winEndCameras.Length < 2) return;
-
-        // Temporarily switch to an instant cut
-        var originalBlend = brain.m_DefaultBlend;
-        brain.m_DefaultBlend = new CinemachineBlendDefinition(CinemachineBlendDefinition.Style.Cut, 0f);
-
-        // Force-cut to the first end camera (static start camera)
-        winEndCameras[0].Priority = 100;
-        brain.ManualUpdate(); // Apply camera instantly
-
-        // Restore smooth blending
-        brain.m_DefaultBlend = originalBlend;
-
-        // Schedule transition to the animated camera after a short delay
-        StartCoroutine(SwitchToSecondVictoryCam());
-    }
-
-    private IEnumerator SwitchToSecondVictoryCam()
-    {
-        yield return new WaitForSeconds(0.1f); // Optional: small delay for better visual cut
-
-        // Make sure the second camera has higher priority
-        winEndCameras[1].Priority = 101;
-    }
+    
 }
 
