@@ -1,3 +1,4 @@
+using Cinemachine;
 using StarterAssets;
 using System.Collections;
 using System.Collections.Generic;
@@ -15,6 +16,8 @@ public class CapturePoint : MonoBehaviour
 
     private Collider captureTrigger;
     private FirstPersonController playerController;
+    public CinemachineVirtualCamera[] winEndCameras;
+    public CinemachineVirtualCamera[] looseEndCameras;
 
     private bool pointCaptured = false;
 
@@ -88,7 +91,7 @@ public class CapturePoint : MonoBehaviour
             }
 
             //check for 100% capture
-            if (playerCounter >= 100)
+            if (playerCounter >= 15)
             {
                 FinalizePointCapture("Player");
 
@@ -110,8 +113,34 @@ public class CapturePoint : MonoBehaviour
         Debug.Log(winner + " wins! Capture point locked.");
 
         playerController.enabled = false;
+    }
 
-        // TODO: Add your game over logic here (e.g. show UI, stop player input, etc.)
+    private void ShowVictoryScreen()
+    {
+        var brain = CinemachineCore.Instance.GetActiveBrain(0);
+        if (brain == null || winEndCameras.Length < 2) return;
+
+        // Temporarily switch to an instant cut
+        var originalBlend = brain.m_DefaultBlend;
+        brain.m_DefaultBlend = new CinemachineBlendDefinition(CinemachineBlendDefinition.Style.Cut, 0f);
+
+        // Force-cut to the first end camera (static start camera)
+        winEndCameras[0].Priority = 100;
+        brain.ManualUpdate(); // Apply camera instantly
+
+        // Restore smooth blending
+        brain.m_DefaultBlend = originalBlend;
+
+        // Schedule transition to the animated camera after a short delay
+        StartCoroutine(SwitchToSecondVictoryCam());
+    }
+
+    private IEnumerator SwitchToSecondVictoryCam()
+    {
+        yield return new WaitForSeconds(0.1f); // Optional: small delay for better visual cut
+
+        // Make sure the second camera has higher priority
+        winEndCameras[1].Priority = 101;
     }
 }
 

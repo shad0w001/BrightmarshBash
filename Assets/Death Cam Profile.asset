@@ -167,7 +167,7 @@ MonoBehaviour:
   hueVsSat:
     m_OverrideState: 1
     m_Value:
-      <length>k__BackingField: 0
+      <length>k__BackingField: 1
       m_Loop: 1
       m_ZeroValue: 0.5
       m_Range: 1
