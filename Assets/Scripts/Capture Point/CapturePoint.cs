@@ -4,6 +4,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using TMPro;
+using UnityEngine.SceneManagement;
 
 public class CapturePoint : MonoBehaviour
 {
@@ -14,7 +15,7 @@ public class CapturePoint : MonoBehaviour
 
     private int playerCounter = 0;
     private int enemyCounter = 0;
-    public int counterMaxValue = 15;
+    public int counterMaxValue = 3;
 
     private Collider captureTrigger;
     private FirstPersonController playerController;
@@ -28,6 +29,8 @@ public class CapturePoint : MonoBehaviour
 
     public TMP_Text playerProgressText;
     public TMP_Text enemyProgressText;
+    public TMP_Text endResult;
+    public CinemachineVirtualCamera endCam;
 
     private void Awake()
     {
@@ -47,12 +50,10 @@ public class CapturePoint : MonoBehaviour
         if (other.CompareTag("Player"))
         {
             playerInside = true;
-            Debug.Log("Player entered capture point");
         }
         else if (other.CompareTag("Enemy"))
         {
             enemyInside = true;
-            Debug.Log("Enemy entered capture point");
         }
     }
 
@@ -63,12 +64,10 @@ public class CapturePoint : MonoBehaviour
         if (other.CompareTag("Player"))
         {
             playerInside = false;
-            Debug.Log("Player left capture point");
         }
         else if (other.CompareTag("Enemy"))
         {
             enemyInside = false;
-            Debug.Log("Enemy left capture point");
         }
     }
 
@@ -86,12 +85,10 @@ public class CapturePoint : MonoBehaviour
             if (playerInside && !enemyInside)
             {
                 playerCounter += 3;
-                Debug.Log("Player counter: " + playerCounter);
             }
             else if (enemyInside && !playerInside)
             {
                 enemyCounter += 3;
-                Debug.Log("Enemy counter: " + enemyCounter);
             }
             else
             {
@@ -103,16 +100,12 @@ public class CapturePoint : MonoBehaviour
             if (playerCounter >= counterMaxValue)
             {
                 playerCounter = counterMaxValue;
-                FinalizePointCapture("Player");
-
-                //ShowVictoryScreen()
+                FinalizePointCapture("Victory!");
             }
             else if (enemyCounter >= counterMaxValue)
             {
                 enemyCounter = counterMaxValue;
-                FinalizePointCapture("Enemy");
-
-                //ShowDefeatScreen()
+                FinalizePointCapture("Defeat!");
             }
 
             playerProgressText.text = $"{playerCounter}%";
@@ -140,11 +133,30 @@ public class CapturePoint : MonoBehaviour
     private void FinalizePointCapture(string winner)
     {
         pointCaptured = true;
-        captureTrigger.enabled = false; //disable the trigger collider so there is no more capturing
-        Debug.Log(winner + " wins! Capture point locked.");
+        captureTrigger.enabled = false;
 
         playerController.enabled = false;
+
+        playerProgressText.text = "";
+        enemyProgressText.text = "";
+
+        CameraManager.SwitchCamera(endCam);
+
+        StartCoroutine(ShowEndResultAfterDelay(winner));
     }
-    
+
+    private IEnumerator ShowEndResultAfterDelay(string winner)
+    {
+        yield return new WaitForSeconds(5f); // wait for 5 seconds
+        endResult.text = winner;
+        StartCoroutine(ExitGame());
+    }
+
+    private IEnumerator ExitGame()
+    {
+        yield return new WaitForSeconds(5f);
+        Application.Quit();
+    }
+
 }
 
