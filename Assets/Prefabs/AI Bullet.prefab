@@ -150,14 +150,14 @@ MonoBehaviour:
   bouncinessFactor: 0
   useGravity: 0
   explosionRange: 5
-  explosionForce: 20
-  explosionUpwardForce: 5
+  explosionForce: 25
+  explosionUpwardForce: 10
   explosionEffect: {fileID: 298600094589408116, guid: 36d56198cec688647b4e251f2356a325, type: 3}
   isHittable:
     serializedVersion: 2
     m_Bits: 200
-  upwardBiasMultiplier: 5
-  maxNumberOfCollisions: 2
+  upwardBiasMultiplier: 10
+  maxNumberOfCollisions: 1
   maxLifeTimeInSeconds: 1.5
   explodeOnTouch: 1
   gracePeriod: 0.5
