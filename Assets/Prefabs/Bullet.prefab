@@ -151,7 +151,7 @@ MonoBehaviour:
   explosionEffect: {fileID: 3352391191284423565, guid: 9571e0e1b1e65834cbba759493c171d3, type: 3}
   isHittable:
     serializedVersion: 2
-    m_Bits: 72
+    m_Bits: 200
   bouncinessFactor: 0.2
   useGravity: 1
   explosionRange: 1.5

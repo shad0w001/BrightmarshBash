@@ -84,7 +84,7 @@ public class CapturePoint : MonoBehaviour
             }
             else
             {
-                Debug.Log("No capture progress this second");
+                //Debug.Log("No capture progress this second");
             }
 
             //check for 100% capture

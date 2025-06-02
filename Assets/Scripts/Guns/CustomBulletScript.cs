@@ -129,10 +129,24 @@ public class CustomBulletScript : MonoBehaviour
                     continue;
                 }
             }
+            else
+            {
+                Debug.Log("Hit enemy");
 
-            //else (hits enemy)
-            Debug.Log("Hit enemy");
-            rb.AddExplosionForce(explosionForce, transform.position, explosionRange, explosionUpwardForce, ForceMode.Impulse);
+                IPhysicsHandler physicsHandler = target.GetComponent<IPhysicsHandler>();
+                if (physicsHandler != null)
+                {
+                    Vector3 forceDir = (target.transform.position - transform.position).normalized;
+                    Vector3 force = forceDir * explosionForce + Vector3.up * explosionUpwardForce;
+
+                    physicsHandler.ApplyForce(force);
+                }
+                else
+                {
+                    // fallback in case no handler found
+                    rb.AddExplosionForce(explosionForce, transform.position, explosionRange, explosionUpwardForce, ForceMode.Impulse);
+                }
+            }
         }
 
         DestroyBullet();
