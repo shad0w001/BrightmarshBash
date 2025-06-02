@@ -3,8 +3,10 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
 
+
 public enum EnemyState
 {
+    SeekingCapturePoint,
     Patrolling,
     Chasing,
     Attacking
@@ -14,30 +16,46 @@ public class EnemyAI : MonoBehaviour
 {
     public NavMeshAgent agent;
     public Transform player;
+    public Transform capturePoint;
+
     public LayerMask isGround, isPlayer;
 
-    public Vector3 walkPoint;
-    bool hasSetWalkPoint;
-    public float walkPointRange;
-
-    public float sightRange, attackRange;
-    public bool playerInSightRange, playerInAttackRange;
+    public float sightRange = 10f;
+    public float attackRange = 2f;
+    public float capturePointRange = 5f;
+    public float patrolPointThreshold = 1.5f;
 
     private EnemyState currentState;
 
+    private Vector3 patrolTarget;
+    private bool hasPatrolTarget;
+
+    private bool playerInSightRange;
+    private bool playerInAttackRange;
+
     private void Awake()
     {
-        player = GameObject.Find("PlayerCapsule").transform;
         agent = GetComponent<NavMeshAgent>();
-        currentState = EnemyState.Patrolling;
+        player = GameObject.Find("PlayerCapsule").transform;
+
+        if (capturePoint == null)
+        {
+            Debug.LogError("Capture Point not assigned.");
+        }
+
+        Debug.Log($"{capturePoint.position.ToString()}");
+        currentState = EnemyState.SeekingCapturePoint;
     }
 
     private void Update()
     {
+        if (capturePoint == null || agent == null || !agent.isOnNavMesh) return;
+
+        // Check player proximity
         playerInSightRange = Physics.CheckSphere(transform.position, sightRange, isPlayer);
         playerInAttackRange = Physics.CheckSphere(transform.position, attackRange, isPlayer);
 
-        // Transition between states
+        // State transitions (priority order)
         if (playerInAttackRange)
         {
             SwitchState(EnemyState.Attacking);
@@ -48,24 +66,32 @@ public class EnemyAI : MonoBehaviour
         }
         else
         {
-            SwitchState(EnemyState.Patrolling);
+            float distToCapture = Vector3.Distance(transform.position, capturePoint.position);
+
+            if (distToCapture > capturePointRange)
+                SwitchState(EnemyState.SeekingCapturePoint);
+            else
+                SwitchState(EnemyState.Patrolling);
         }
 
-        // Act based on current state
+        // Handle state behavior
         switch (currentState)
         {
+            case EnemyState.SeekingCapturePoint:
+                Debug.Log("seeking capture point");
+                SeekCapturePoint();
+                break;
             case EnemyState.Patrolling:
-                Patroling();
+                Debug.Log("patroling");
+                PatrolAroundCapturePoint();
                 break;
             case EnemyState.Chasing:
+                Debug.Log("chasing");
                 ChasePlayer();
                 break;
             case EnemyState.Attacking:
-                if (agent.enabled && agent.isOnNavMesh)
-                {
-                    agent.SetDestination(transform.position);
-                }
-                // Attack logic here
+                Debug.Log("attacking");
+                StopAndAttack();
                 break;
         }
     }
@@ -75,46 +101,57 @@ public class EnemyAI : MonoBehaviour
         if (currentState != newState)
         {
             currentState = newState;
-            hasSetWalkPoint = false; // reset patrol path if state changed
+            hasPatrolTarget = false;
         }
     }
 
-    private void Patroling()
+    private void SeekCapturePoint()
     {
-        if (!hasSetWalkPoint)
+        if (agent.enabled)
         {
-            float randomZ = Random.Range(-walkPointRange, walkPointRange);
-            float randomX = Random.Range(-walkPointRange, walkPointRange);
+            agent.SetDestination(capturePoint.position);
+        }
+    }
 
-            walkPoint = new Vector3(transform.position.x + randomX, transform.position.y, transform.position.z + randomZ);
+    private void PatrolAroundCapturePoint()
+    {
+        if (!hasPatrolTarget)
+        {
+            Vector2 offset = Random.insideUnitCircle * capturePointRange;
+            patrolTarget = capturePoint.position + new Vector3(offset.x, 0, offset.y);
 
-            if (Physics.Raycast(walkPoint, -transform.up, 2f, isGround))
+            if (Physics.Raycast(patrolTarget + Vector3.up * 2f, Vector3.down, 4f, isGround))
             {
-                hasSetWalkPoint = true;
+                hasPatrolTarget = true;
             }
         }
 
-        if (hasSetWalkPoint)
+        if (hasPatrolTarget && agent.enabled)
         {
-            if (agent.enabled && agent.isOnNavMesh)
-            {
-                agent.SetDestination(walkPoint);
-            }
+            agent.SetDestination(patrolTarget);
         }
 
-        Vector3 distanceToWalkPoint = transform.position - walkPoint;
-
-        if (distanceToWalkPoint.magnitude < 1f)
+        if (Vector3.Distance(transform.position, patrolTarget) < patrolPointThreshold)
         {
-            hasSetWalkPoint = false;
+            hasPatrolTarget = false;
         }
     }
 
     private void ChasePlayer()
     {
-        if (agent.enabled && agent.isOnNavMesh)
+        if (agent.enabled)
         {
             agent.SetDestination(player.position);
-        } 
+        }
+    }
+
+    private void StopAndAttack()
+    {
+        if (agent.enabled)
+        {
+            agent.ResetPath(); // Stop moving
+        }
+
+        // TODO: Trigger attack animations/effects
     }
 }

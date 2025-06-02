@@ -6,15 +6,16 @@ TagManager:
   tags:
   - CinemachineTarget
   - Enemy
+  - CapturePoint
   layers:
   - Default
   - TransparentFX
   - Ignore Raycast
-  - 
+  - Enviornment
   - Water
   - UI
   - isHittable
-  - 
+  - Player
   - 
   - 
   - 
