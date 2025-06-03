@@ -135,10 +135,10 @@ public class CapturePoint : MonoBehaviour
         pointCaptured = true;
         captureTrigger.enabled = false;
 
-        playerController.enabled = false;
-
         playerProgressText.text = "";
         enemyProgressText.text = "";
+
+        playerController.enabled = false;
 
         CameraManager.SwitchCamera(endCam);
 
@@ -147,7 +147,7 @@ public class CapturePoint : MonoBehaviour
 
     private IEnumerator ShowEndResultAfterDelay(string winner)
     {
-        yield return new WaitForSeconds(5f); // wait for 5 seconds
+        yield return new WaitForSeconds(5f);
         endResult.text = winner;
         StartCoroutine(ExitGame());
     }
@@ -155,7 +155,11 @@ public class CapturePoint : MonoBehaviour
     private IEnumerator ExitGame()
     {
         yield return new WaitForSeconds(5f);
-        Application.Quit();
+
+        Cursor.lockState = CursorLockMode.None;
+        Cursor.visible = true;
+
+        SceneManager.LoadSceneAsync(0);
     }
 
 }
